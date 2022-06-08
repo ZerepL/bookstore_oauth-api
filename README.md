@@ -6,6 +6,12 @@ A Golang microservice that will be used as an OAuth API to centralize authentica
 
 ![Arch](./miscs/oauth.png)
 
+## How it works
+
+![OAuth](./miscs/oauth_system.png)
+
+This service will work as a security layer for other services, basic all requisition will need a token that will be generated and used by the client to make requests to others APIs, this APIs will send a request back to our OAuth in order to verify if this token is valid.
+
 ## Requirements
 
 ### Standalone
@@ -30,9 +36,9 @@ This app collect some data from env, bellow you can find a list of all vars and 
 |                      |  Database URL   |
 |                      | Database Schema |
 
-### Creating the container
+Inside this folder you will find a file called *migration.cql*, run it in your database.
 
-* TBD
+### Creating the container
 
 While the same folder of Dockerfile, run:
 
@@ -42,25 +48,58 @@ docker build --tag bookstore_oauth-api:latest .
 
 ## Running
 
-
 ``` shell
 go run *.go
 ```
 
 ### Running as container
 
-* TBD
+Starting Cassandra container:
+
+``` shell
+docker run --name cassandra --network host -d cassandra:latest
+```
+
+Remember to run *migration.sql* in your database
+
+Starting the app
+
+``` shell
+docker run -ti --network host bookstore_oauth-api:latest
+```
 
 ## API
+
+### /oauth/
+
+|   Function   | Method |     Path      | Expected |
+|:------------:|:------:|:-------------:|:--------:|
+|  Get token   |  GET   | /{token_name} |  String  |
+| Create token |  POST  |       /       |   JSON   |
+| Update token |  PUT   | /{token_name} |  String  |
+
+
+#### Create Token
+
+return a token
+
+``` json
+{
+    "access_token": "abc123",
+    "user_id": 1,
+    "client_id": 2,
+    "expires": 123
+}
+```
+
+#### Update Token
 
 * TBD
 
 ## TODO
 
 * Create deployment for K8s
-* Create Docker file
-* Implement API
-* Implement Cassandra integration
+* Swagger doc
 
 ## Credits
 
