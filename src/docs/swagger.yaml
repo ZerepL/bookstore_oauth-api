@@ -1,0 +1,77 @@
+definitions:
+  access_token.AccessToken:
+    properties:
+      access_token:
+        type: string
+      client_id:
+        type: integer
+      expires:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  internalErrors.RestErr:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /oauth:
+    post:
+      description: create a token user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/access_token.AccessToken'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internalErrors.RestErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internalErrors.RestErr'
+      summary: Create Token
+      tags:
+      - oauth
+  /oauth/{access_token_id}:
+    get:
+      description: get token info
+      parameters:
+      - description: token name
+        in: path
+        name: access_token_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/access_token.AccessToken'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/internalErrors.RestErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/internalErrors.RestErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/internalErrors.RestErr'
+      summary: Get token
+      tags:
+      - oauth
+swagger: "2.0"
