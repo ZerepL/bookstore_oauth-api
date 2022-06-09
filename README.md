@@ -10,7 +10,7 @@ A Golang microservice that will be used as an OAuth API to centralize authentica
 
 ![OAuth](./miscs/oauth_system.png)
 
-This service will work as a security layer for other services, basic all requisition will need a token that will be generated and used by the client to make requests to others APIs, this APIs will send a request back to our OAuth in order to verify if this token is valid.
+This service will work as a security layer for other services, basic all requisition will need a token that will be generated and used by the client to make requests to others APIs, these APIs will send a request back to our OAuth in order to verify if this token is valid.
 
 ## Requirements
 
@@ -27,14 +27,10 @@ This service will work as a security layer for other services, basic all requisi
 
 This app collect some data from env, bellow you can find a list of all vars and their values:
 
-* TBD
-
-|       Variable       |   Description   |
-|:--------------------:|:---------------:|
-|                      |  Database User  |
-|                      |  Database Pass  |
-|                      |  Database URL   |
-|                      | Database Schema |
+|         Variable          |    Description    |
+|:-------------------------:|:-----------------:|
+|   cassandra_oauth_host    |   Database URL    |
+| cassandra_oauth_keyspace  | Database Keyspace |
 
 Inside this folder you will find a file called *migration.cql*, run it in your database.
 
@@ -60,12 +56,12 @@ Starting Cassandra container:
 docker run --name cassandra --network host -d cassandra:latest
 ```
 
-Remember to run *migration.sql* in your database
+Remember to run *migration.cql* in your database
 
 Starting the app
 
 ``` shell
-docker run -ti --network host bookstore_oauth-api:latest
+docker run -ti --network host -e cassandra_oauth_host=127.0.0.1 -e cassandra_oauth_keyspace=oauth bookstore_oauth-api:latest
 ```
 
 ## API
@@ -99,7 +95,6 @@ return a token
 ## TODO
 
 * Create deployment for K8s
-* Swagger doc
 
 ## Credits
 

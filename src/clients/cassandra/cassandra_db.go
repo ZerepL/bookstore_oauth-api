@@ -2,6 +2,7 @@ package cassandra
 
 import (
 	"github.com/gocql/gocql"
+	"os"
 )
 
 var (
@@ -9,10 +10,20 @@ var (
 	session *gocql.Session
 )
 
+const (
+	cassandraOAuthHost     = "cassandra_oauth_host"
+	cassandraOAuthKeyspace = "cassandra_oauth_keyspace"
+)
+
+var (
+	host     = os.Getenv(cassandraOAuthHost)
+	keyspace = os.Getenv(cassandraOAuthKeyspace)
+)
+
 func init() {
 	// Connect to Cassandra cluster
-	cluster = gocql.NewCluster("127.0.0.1")
-	cluster.Keyspace = "oauth"
+	cluster = gocql.NewCluster(host)
+	cluster.Keyspace = keyspace
 	cluster.Consistency = gocql.Quorum
 
 	var err error
