@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	bookstoreUsersLoginEndPoint = bookstoreUsersEndPoint + "/users/login"
+	bookstoreUsersLoginEndPoint = bookstoreUsersEndPoint + userLogin
 )
 
 func TestMain(m *testing.M) {
@@ -20,12 +20,13 @@ func TestMain(m *testing.M) {
 func TestLoginUserTimeoutFromApi(t *testing.T) {
 	rest.FlushMockups()
 	rest.AddMockups(&rest.Mock{
-		URL:          bookstoreUsersLoginEndPoint,
 		HTTPMethod:   http.MethodPost,
-		ReqBody:      `{"email":"email@email.com","password":"the-password"}`,
+		URL:          bookstoreUsersLoginEndPoint,
+		ReqBody:      `{"email":"email@gmail.com","password":"the-password"}`,
 		RespHTTPCode: -1,
 		RespBody:     `{}`,
 	})
+
 	repository := usersRepository{}
 
 	user, err := repository.LoginUser("email@gmail.com", "the-password")
@@ -33,18 +34,19 @@ func TestLoginUserTimeoutFromApi(t *testing.T) {
 	assert.Nil(t, user)
 	assert.NotNil(t, err)
 	assert.EqualValues(t, http.StatusInternalServerError, err.Status)
-	assert.EqualValues(t, "invalid restClient response when trying to login user", err.Message)
+	assert.EqualValues(t, "invalid restclient response when trying to login user", err.Message)
 }
 
 func TestLoginUserInvalidErrorInterface(t *testing.T) {
 	rest.FlushMockups()
 	rest.AddMockups(&rest.Mock{
-		URL:          bookstoreUsersLoginEndPoint,
 		HTTPMethod:   http.MethodPost,
-		ReqBody:      `{"email":"email@email.com","password":"the-password"}`,
+		URL:          bookstoreUsersLoginEndPoint,
+		ReqBody:      `{"email":"email@gmail.com","password":"the-password"}`,
 		RespHTTPCode: http.StatusNotFound,
 		RespBody:     `{"message": "invalid login credentials", "status": "404", "error": "not_found"}`,
 	})
+
 	repository := usersRepository{}
 
 	user, err := repository.LoginUser("email@gmail.com", "the-password")
@@ -58,12 +60,13 @@ func TestLoginUserInvalidErrorInterface(t *testing.T) {
 func TestLoginUserInvalidLoginCredentials(t *testing.T) {
 	rest.FlushMockups()
 	rest.AddMockups(&rest.Mock{
-		URL:          bookstoreUsersLoginEndPoint,
 		HTTPMethod:   http.MethodPost,
+		URL:          bookstoreUsersLoginEndPoint,
 		ReqBody:      `{"email":"email@gmail.com","password":"the-password"}`,
 		RespHTTPCode: http.StatusNotFound,
 		RespBody:     `{"message": "invalid login credentials", "status": 404, "error": "not_found"}`,
 	})
+
 	repository := usersRepository{}
 
 	user, err := repository.LoginUser("email@gmail.com", "the-password")
@@ -77,15 +80,16 @@ func TestLoginUserInvalidLoginCredentials(t *testing.T) {
 func TestLoginUserInvalidUserJsonResponse(t *testing.T) {
 	rest.FlushMockups()
 	rest.AddMockups(&rest.Mock{
-		URL:          bookstoreUsersLoginEndPoint,
 		HTTPMethod:   http.MethodPost,
-		ReqBody:      `{"email":"email@email.com","password":"password"}`,
+		URL:          bookstoreUsersLoginEndPoint,
+		ReqBody:      `{"email":"email@gmail.com","password":"the-password"}`,
 		RespHTTPCode: http.StatusOK,
-		RespBody:     `{"id": "1", "first_name": "test", "last_name": "test2", "email": "email@email.com"}`,
+		RespBody:     `{"id": "1", "first_name": "Fede", "last_name": "León", "email": "fedeleon.cba@gmail.com"}`,
 	})
+
 	repository := usersRepository{}
 
-	user, err := repository.LoginUser("email@gmail.com", "password")
+	user, err := repository.LoginUser("email@gmail.com", "the-password")
 
 	assert.Nil(t, user)
 	assert.NotNil(t, err)
@@ -96,20 +100,21 @@ func TestLoginUserInvalidUserJsonResponse(t *testing.T) {
 func TestLoginUserNoError(t *testing.T) {
 	rest.FlushMockups()
 	rest.AddMockups(&rest.Mock{
-		URL:          bookstoreUsersLoginEndPoint,
 		HTTPMethod:   http.MethodPost,
-		ReqBody:      `{"email":"email@email.com","password":"password"}`,
+		URL:          bookstoreUsersLoginEndPoint,
+		ReqBody:      `{"email":"email@gmail.com","password":"the-password"}`,
 		RespHTTPCode: http.StatusOK,
-		RespBody:     `{"id": 1, "first_name": "first", "last_name": "second", "email": "email@email.com"}`,
+		RespBody:     `{"id": 1, "first_name": "Fede", "last_name": "León", "email": "fedeleon.cba@gmail.com"}`,
 	})
+
 	repository := usersRepository{}
 
-	user, err := repository.LoginUser("email@gmail.com", "password")
+	user, err := repository.LoginUser("email@gmail.com", "the-password")
 
 	assert.Nil(t, err)
 	assert.NotNil(t, user)
 	assert.EqualValues(t, 1, user.Id)
-	assert.EqualValues(t, "first", user.FirstName)
-	assert.EqualValues(t, "second", user.LastName)
-	assert.EqualValues(t, "email@email.com", user.Email)
+	assert.EqualValues(t, "Fede", user.FirstName)
+	assert.EqualValues(t, "León", user.LastName)
+	assert.EqualValues(t, "fedeleon.cba@gmail.com", user.Email)
 }

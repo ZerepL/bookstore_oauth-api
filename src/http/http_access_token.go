@@ -1,10 +1,11 @@
 package http
 
 import (
-	internalErrors "github.com/ZerepL/bookstore_oauth-api/src/utils/errors"
+	"github.com/ZerepL/bookstore_oauth-api/src/services/access_token_service"
+	internalErrors "github.com/ZerepL/bookstore_utils/internal_errors"
 	"net/http"
 
-	"github.com/ZerepL/bookstore_oauth-api/src/domain/access_token"
+	atDomain "github.com/ZerepL/bookstore_oauth-api/src/domain/access_token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,10 +15,10 @@ type AccessTokenHandler interface {
 }
 
 type accessTokenHandler struct {
-	service access_token.Service
+	service access_token_service.Service
 }
 
-func NewHandler(service access_token.Service) AccessTokenHandler {
+func NewAccessTokenHandler(service access_token_service.Service) AccessTokenHandler {
 	return &accessTokenHandler{
 		service: service,
 	}
@@ -37,7 +38,7 @@ func NewHandler(service access_token.Service) AccessTokenHandler {
 func (handler *accessTokenHandler) GetById(c *gin.Context) {
 	accessToken, err := handler.service.GetById(c.Param("access_token_id"))
 	if err != nil {
-		c.JSON(err.Status, err)
+		c.JSON(err.Status(), err)
 		return
 	}
 	c.JSON(http.StatusOK, accessToken)
@@ -53,18 +54,17 @@ func (handler *accessTokenHandler) GetById(c *gin.Context) {
 // @Failure      500  {object}  internalErrors.RestErr
 // @Router       /oauth [post]
 func (handler *accessTokenHandler) Create(c *gin.Context) {
-	var at access_token.AccessToken
-
-	if err := c.ShouldBindJSON(&at); err != nil {
+	var request atDomain.AccessTokenRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		restErr := internalErrors.NewBadRequestError("invalid json body")
-		c.JSON(restErr.Status, restErr)
+		c.JSON(restErr.Status(), restErr)
 		return
 	}
 
-	if err := handler.service.Create(at); err != nil {
-		c.JSON(err.Status, err)
+	accessToken, err := handler.service.Create(request)
+	if err != nil {
+		c.JSON(err.Status(), err)
 		return
 	}
-
-	c.JSON(http.StatusCreated, at)
+	c.JSON(http.StatusCreated, accessToken)
 }
